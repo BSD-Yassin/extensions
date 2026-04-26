@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "github-pr",
+  "title": "GitHub",
+  "description": "Quick GitHub and pull request actions",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "author": "BSD-Yassin",
+  "contributors": [],
+  "pastContributors": [],
+  "icon": "extension_icon.svg",
+  "commands": [
+    {
+      "name": "open-github",
+      "title": "Open GitHub",
+      "description": "Open GitHub homepage",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-pull-requests",
+      "title": "My Pull Requests",
+      "description": "Open pull requests page for a repository",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultRepo",
+      "title": "Default Repository",
+      "description": "owner/repo format, e.g. BSD-Yassin/extensions",
+      "required": false,
+      "type": "textfield",
+      "default": "BSD-Yassin/extensions"
+    }
+  ],
+  "scripts": {
+    "build": "vici build",
+    "dev": "vici develop",
+    "lint": "vici lint"
+  },
+  "dependencies": {
+    "@vicinae/api": "^0.20.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
