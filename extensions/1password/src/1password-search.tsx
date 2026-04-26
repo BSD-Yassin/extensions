@@ -1,4 +1,15 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, open, showToast, Toast } from "@vicinae/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+  showToast,
+  Toast,
+} from "@vicinae/api";
 import { execFileSync } from "node:child_process";
 import { useMemo, useState } from "react";
 
@@ -17,6 +28,11 @@ function loadItems(opPath: string): OpItem[] {
     });
     return [];
   }
+}
+
+function getItemField(opPath: string, itemId: string, field: "password" | "username"): string {
+  const raw = execFileSync(opPath, ["item", "get", itemId, "--reveal", "--fields", field], { encoding: "utf8" });
+  return raw.trim();
 }
 
 export default function OnePasswordSearchCommand() {
@@ -42,6 +58,66 @@ export default function OnePasswordSearchCommand() {
           actions={
             <ActionPanel>
               <Action title="Open 1Password Web Vault" onAction={() => open("https://my.1password.com/")} />
+              <Action
+                title="Copy Password"
+                onAction={async () => {
+                  try {
+                    const value = getItemField(opPath, item.id, "password");
+                    if (!value) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "No password field found",
+                        message: item.title,
+                      });
+                      return;
+                    }
+                    await Clipboard.copy(value);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Password copied",
+                      message: item.title,
+                    });
+                    await closeMainWindow();
+                  } catch (error) {
+                    const message = error instanceof Error ? error.message : "Unknown error";
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to copy password",
+                      message,
+                    });
+                  }
+                }}
+              />
+              <Action
+                title="Copy Username"
+                onAction={async () => {
+                  try {
+                    const value = getItemField(opPath, item.id, "username");
+                    if (!value) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "No username field found",
+                        message: item.title,
+                      });
+                      return;
+                    }
+                    await Clipboard.copy(value);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Username copied",
+                      message: item.title,
+                    });
+                    await closeMainWindow();
+                  } catch (error) {
+                    const message = error instanceof Error ? error.message : "Unknown error";
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to copy username",
+                      message,
+                    });
+                  }
+                }}
+              />
               <Action.CopyToClipboard title="Copy Item ID" content={item.id} />
             </ActionPanel>
           }
