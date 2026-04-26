@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "bitwarden",
+  "title": "Bitwarden",
+  "description": "Search items with Bitwarden CLI",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "author": "BSD-Yassin",
+  "contributors": [],
+  "pastContributors": [],
+  "icon": "extension_icon.svg",
+  "commands": [
+    {
+      "name": "bitwarden-search",
+      "title": "Search Bitwarden",
+      "description": "Search vault items via bw CLI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bwPath",
+      "title": "bw CLI Path",
+      "description": "Default: bw",
+      "required": false,
+      "type": "textfield",
+      "default": "bw"
+    }
+  ],
+  "scripts": {
+    "build": "vici build",
+    "dev": "vici develop",
+    "lint": "vici lint"
+  },
+  "dependencies": {
+    "@vicinae/api": "^0.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}
