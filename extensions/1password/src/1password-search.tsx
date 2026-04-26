@@ -6,15 +6,20 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  LocalStorage,
   open,
   showToast,
   Toast,
 } from "@vicinae/api";
 import { execFileSync } from "node:child_process";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Preferences = { opPath?: string };
 type OpItem = { id: string; title: string; vault?: { name?: string } };
+type CachedItems = { savedAt: number; items: OpItem[] };
+
+const ITEMS_CACHE_KEY = "onepassword.items.cache.v1";
+const ITEMS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function loadItems(opPath: string): OpItem[] {
   try {
@@ -30,6 +35,24 @@ function loadItems(opPath: string): OpItem[] {
   }
 }
 
+async function readCachedItems(): Promise<OpItem[]> {
+  const raw = await LocalStorage.getItem<string>(ITEMS_CACHE_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as CachedItems;
+    if (!Array.isArray(parsed.items)) return [];
+    if (Date.now() - parsed.savedAt > ITEMS_CACHE_TTL_MS) return [];
+    return parsed.items;
+  } catch {
+    return [];
+  }
+}
+
+async function writeCachedItems(items: OpItem[]) {
+  const payload: CachedItems = { savedAt: Date.now(), items };
+  await LocalStorage.setItem(ITEMS_CACHE_KEY, JSON.stringify(payload));
+}
+
 function getItemField(opPath: string, itemId: string, field: "password" | "username"): string {
   const raw = execFileSync(opPath, ["item", "get", itemId, "--reveal", "--fields", field], { encoding: "utf8" });
   return raw.trim();
@@ -39,7 +62,33 @@ export default function OnePasswordSearchCommand() {
   const prefs = getPreferenceValues<Preferences>();
   const opPath = prefs.opPath?.trim() || "op";
   const [searchText, setSearchText] = useState("");
-  const all = loadItems(opPath);
+  const [all, setAll] = useState<OpItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const cached = await readCachedItems();
+      if (!cancelled && cached.length > 0) {
+        setAll(cached);
+        setIsLoading(false);
+      }
+
+      try {
+        const fresh = loadItems(opPath);
+        if (!cancelled) {
+          setAll(fresh);
+          setIsLoading(false);
+        }
+        await writeCachedItems(fresh);
+      } catch {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [opPath]);
 
   const filtered = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -48,7 +97,12 @@ export default function OnePasswordSearchCommand() {
   }, [all, searchText]);
 
   return (
-    <List searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Search 1Password items...">
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search 1Password items..."
+    >
       {filtered.map((item) => (
         <List.Item
           key={item.id}
