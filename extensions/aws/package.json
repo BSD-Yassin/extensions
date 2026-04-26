@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "aws",
+  "title": "Amazon AWS",
+  "description": "Open AWS Console quickly from local AWS profiles",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "author": "BSD-Yassin",
+  "contributors": [],
+  "pastContributors": [],
+  "icon": "extension_icon.svg",
+  "commands": [
+    {
+      "name": "aws-console",
+      "title": "AWS Console",
+      "description": "Open common AWS services for local profiles",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultRegion",
+      "title": "Default Region",
+      "description": "Fallback region if profile has none",
+      "required": false,
+      "type": "textfield",
+      "default": "eu-west-1"
+    }
+  ],
+  "scripts": {
+    "build": "vici build",
+    "dev": "vici develop",
+    "lint": "vici lint"
+  },
+  "dependencies": {
+    "@vicinae/api": "^0.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}
