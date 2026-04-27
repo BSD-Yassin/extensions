@@ -14,13 +14,44 @@
   "icon": "extension_icon.svg",
   "commands": [
     {
-      "name": "tailscale-status",
-      "title": "Tailscale Status",
-      "description": "List Tailscale peers from tailscale status --json",
-      "mode": "view"
+      "name": "index",
+      "title": "Tailscale",
+      "description": "Inspect Tailscale status and quickly open peers",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "search query",
+          "required": false,
+          "type": "text"
+        }
+      ]
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "refresh-interval",
+      "title": "Refresh Interval",
+      "description": "How often to refresh Tailscale status in background",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        { "title": "1 minute", "value": "1" },
+        { "title": "5 minutes", "value": "5" },
+        { "title": "10 minutes", "value": "10" },
+        { "title": "30 minutes", "value": "30" }
+      ]
+    },
+    {
+      "name": "ssh-target",
+      "title": "Default SSH Target",
+      "description": "Default target when SSH is clicked",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
   "scripts": {
     "build": "vici build",
     "dev": "vici develop",
